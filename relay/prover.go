@@ -10,6 +10,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
+	host "github.com/cosmos/ibc-go/v8/modules/core/24-host"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	"github.com/datachainlab/ethereum-ibc-relay-chain/pkg/client"
 	"github.com/datachainlab/ethereum-ibc-relay-chain/pkg/relay/ethereum"
@@ -485,6 +486,14 @@ func (pr *Prover) ProveState(ctx core.QueryContext, path string, value []byte) (
 	height := pr.newHeight(proofHeight)
 	proof, err := pr.buildStateProof([]byte(path), proofHeight)
 	return proof, height, err
+}
+
+// PacketReceipt returns the proof of the packet receipt at `height`
+func (pr *Prover) PacketReceipt(ctx core.QueryContext, msgTransfer core.PacketInfo, height uint64) (proof []byte, proofHeight clienttypes.Height, err error) {
+	key := host.PacketReceiptKey(msgTransfer.SourcePort, msgTransfer.SourceChannel, msgTransfer.Sequence)
+	proofHeight = pr.newHeight(int64(height))
+	proof, err = pr.buildStateProof(key, int64(height))
+	return proof, proofHeight, err
 }
 
 // ProveHostConsensusState returns an existence proof of the consensus state at `height`
